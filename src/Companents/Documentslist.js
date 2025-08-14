@@ -1,0 +1,12 @@
+const data =[{id:1, name:'Çalışma Ruhsatı ve İzinler', namedesc:'Çalışma Ruhsatı ve İzinlerini',image:require('../Assets/Document/permits.png'),company:{companyname:'Ever Green Tech A.Ş.',companyactivity:' Yazılım Geliştirme Hizmetleri',companydate:'20 mayıs 2023'}},
+{id:2, name:'Faliyet Belgesi',namedesc:'Faaliyet Belgesini',image:require('../Assets/Document/activity.png'), company:{companyname:'Ever Green Tech A.Ş.',companyactivity:'Yazılım Geliştirme Hizmetleri',companydate:'2 Ekim 2023'}},
+{id:3, name:'İmza Sirküleri',namedesc:'İmza Sirkülerini',image:require('../Assets/Document/contract.png'), company:{companyname:'Ever Green Tech A.Ş.',companyactivity:' Yazılım Geliştirme Hizmetleri',companydate:'3 Ekim 2023'}},
+{id:4, name:'Oda Kayıt Belgesi',namedesc:'Oda Kayıt Belgesini',image:require('../Assets/Document/work.png'), company:{companyname:'Ever Green Tech A.Ş.',companyactivity:'Yazılım Geliştirme Hizmetleri',companydate:'4 Ekim 2023'}},
+{id:5, name:'Kuruluş Sözleşmesi',namedesc:'Kuruluş Sözleşmesini',image:require('../Assets/Document/standarize.png'), company:{companyname:'Ever Green Tech A.Ş.',companyactivity:'Yazılım Geliştirme Hizmetleri',companydate:'5 Ekim 2023'}},
+{id:6, name:'Şirketim  Mali Bilgileri',namedesc:'Şirketim  Mali Bilgilerini',image:require('../Assets/Document/email.png'), company:{companyname:'Ever Green Tech A.Ş.',companyactivity:'Yazılım Geliştirme Hizmetleri',companydate:'6 Ekim 2023'}},
+{id:7, name:'Ticaret Sicil Gazetesi',namedesc:'Ticaret Sicil Gazetesini',image:require('../Assets/Document/newspaper.png'), company :{companyname:'Ever Green Tech A.Ş.',companyactivity:'Yazılım Geliştirme Hizmetleri',companydate:'7 Ekim 2023'}},
+{id:8, name:'Ticaret Sicil Tasdiknamesi',namedesc:'Ticaret Sicil Tasdiknamesini', image:require('../Assets/Document/newspapercertificate.png'), company:{companyname:'Ever Green Tech A.Ş.',companyactivity:' Yazılım Geliştirme Hizmetleri',companydate:'8 Ekim 2023'}},
+{id:9, name:'Vergi Levhası',namedesc:'Vergi Levhasını', image:require('../Assets/Document/business.png'), company:{companyname:'Ever Green Tech A.Ş.',companyactivity:'Yazılım Geliştirme Hizmetleri',companydate:'9 Ekim 2023'}},
+{id:10, name:'Yetki Belgesi',namedesc:'Yetki Belgesini', image:require('../Assets/Document/license.png'), company:{companyname:'Ever Green Tech A.Ş.',companyactivity:'Yazılım Geliştirme Hizmetleri',companydate:'10 Ekim 2023'}}];
+
+export default data;
