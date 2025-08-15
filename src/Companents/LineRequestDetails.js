@@ -549,6 +549,11 @@ export default function LineRequestDetails() {
       return;
     }
 
+    if (!uploadedSignature) {
+      Alert.alert('Uyarı', 'Lütfen İmza Sirkülerini yükleyiniz');
+      return;
+    }
+
     setIsSubmitLoading(true);
     // Simüle talep gönderme
     setTimeout(() => {
@@ -563,7 +568,7 @@ export default function LineRequestDetails() {
     }, 2000);
   };
 
-  const isSubmitDisabled = !uploadedDocument || isSubmitLoading;
+  const isSubmitDisabled = !uploadedDocument || !uploadedSignature || isSubmitLoading;
 
   return (
     <LinearGradient
@@ -609,7 +614,7 @@ export default function LineRequestDetails() {
               disabled={isDocumentLoading}
             >
               <Text style={styles.documentInputText}>
-                {isDocumentLoading ? 'Yükleniyor...' : 'Kuruluş Sözleşmesi'}
+               Kuruluş Sözleşmesini Yükle
               </Text>
             </TouchableOpacity>
           ) : (
@@ -633,45 +638,46 @@ export default function LineRequestDetails() {
         </View>
 
         {/* İmza Sirkülerini Yükle */}
-        <TouchableOpacity 
-          style={styles.signatureUploadButton}
-          onPress={handleSignatureUpload}
-          disabled={isSignatureLoading}
-        >
-          <Image 
-            source={require('../Assets/upload.png')} 
-            style={styles.uploadButtonIcon}
-          />
-          <Text style={styles.signatureUploadText}>
-            {isSignatureLoading ? 'Yükleniyor...' : 'İmza Sirkülerini Yükle'}
-          </Text>
-        </TouchableOpacity>
-
-        {/* İmza Sirkülerini Yüklenen Dosya */}
-        {uploadedSignature && (
-          <TouchableOpacity 
-            style={styles.uploadedFileContainer}
-            onPress={() => {
-              if (uploadedSignature && uploadedSignature.uri) {
-                setCurrentPdfUri(uploadedSignature.uri);
-                setCurrentPdfName(uploadedSignature.name);
-                setShowPdfModal(true);
-              }
-            }}
-            activeOpacity={0.8}
-          >
-            <View style={styles.fileInfoContainer}>
-              <Text style={styles.uploadedFileName}>{uploadedSignature.name}</Text>
-              <Text style={styles.uploadedFileSize}>{uploadedSignature.size} - {uploadedSignature.type}</Text>
-            </View>
+        <View style={styles.signatureSection}>
+          {!uploadedSignature ? (
             <TouchableOpacity 
-              style={styles.removeFileButton}
-              onPress={handleRemoveSignature}
+              style={styles.signatureUploadButton}
+              onPress={handleSignatureUpload}
+              disabled={isSignatureLoading}
             >
-              <Text style={styles.removeFileText}>×</Text>
+              <Image 
+                source={require('../Assets/upload.png')} 
+                style={styles.uploadButtonIcon}
+              />
+              <Text style={styles.signatureUploadText}>
+                {isSignatureLoading ? 'Yükleniyor...' : 'İmza Sirkülerini Yükle'}
+              </Text>
             </TouchableOpacity>
-          </TouchableOpacity>
-        )}
+          ) : (
+            <TouchableOpacity 
+              style={styles.uploadedFileContainer}
+              onPress={() => {
+                if (uploadedSignature && uploadedSignature.uri) {
+                  setCurrentPdfUri(uploadedSignature.uri);
+                  setCurrentPdfName(uploadedSignature.name);
+                  setShowPdfModal(true);
+                }
+              }}
+              activeOpacity={0.8}
+            >
+              <View style={styles.fileInfoContainer}>
+                <Text style={styles.uploadedFileName}>{uploadedSignature.name}</Text>
+                <Text style={styles.uploadedFileSize}>{uploadedSignature.size} - {uploadedSignature.type}</Text>
+              </View>
+              <TouchableOpacity 
+                style={styles.removeFileButton}
+                onPress={handleRemoveSignature}
+              >
+                <Text style={styles.removeFileText}>×</Text>
+              </TouchableOpacity>
+            </TouchableOpacity>
+          )}
+        </View>
 
         {/* Talebi Gönderin Butonu */}
         <TouchableOpacity 
@@ -729,48 +735,50 @@ export default function LineRequestDetails() {
               <Text style={styles.emptySubText}>Belgeler sayfasından PDF kaydetmeyi deneyin</Text>
             </View>
           ) : (
-            <FlatList
-              data={savedDocuments}
-              keyExtractor={(item) => item.id}
-              style={styles.documentList}
-              renderItem={({ item }) => (
-                <TouchableOpacity 
-                  style={styles.documentItem}
-                  onPress={() => selectSavedDocument(item)}
-                >
-                  <View style={styles.documentInfo}>
-                    <View style={styles.documentHeader}>
-                      <Image 
-                        source={require('../Assets/file.png')} 
-                        style={styles.documentIcon}
-                      />
-                      <View style={styles.documentDetails}>
-                        <Text style={styles.documentName} numberOfLines={1}>
-                          {item.displayName || item.savedFileName || item.originalFileName}
+            <ScrollView 
+              style={styles.documentScrollContainer}
+              showsVerticalScrollIndicator={true}
+              contentContainerStyle={styles.documentScrollContent}
+            >
+              {savedDocuments.map((item, index) => (
+                <View key={item.id}>
+                  <TouchableOpacity 
+                    style={styles.documentItem}
+                    onPress={() => selectSavedDocument(item)}
+                  >
+                    <View style={styles.documentInfo}>
+                      <View style={styles.documentHeader}>
+                        <Image 
+                          source={require('../Assets/file.png')} 
+                          style={styles.documentIcon}
+                        />
+                        <View style={styles.documentDetails}>
+                          <Text style={styles.documentName} numberOfLines={1}>
+                            {item.displayName || item.savedFileName || item.originalFileName}
+                          </Text>
+                          <Text style={styles.documentType}>
+                            {item.documentNameDesc || item.documentType}
+                          </Text>
+                        </View>
+                      </View>
+                      <View style={styles.documentMeta}>
+                        <Text style={styles.documentSize}>
+                          {formatFileSize(item.fileSize)}
                         </Text>
-                        <Text style={styles.documentType}>
-                          {item.documentNameDesc || item.documentType}
+                        <Text style={styles.documentDate}>
+                          {formatDate(item.createdAt)}
                         </Text>
                       </View>
                     </View>
-                    <View style={styles.documentMeta}>
-                      <Text style={styles.documentSize}>
-                        {formatFileSize(item.fileSize)}
-                      </Text>
-                      <Text style={styles.documentDate}>
-                        {formatDate(item.createdAt)}
-                      </Text>
-                    </View>
-                  </View>
-                  <Image 
-                    source={require('../Assets/down.png')} 
-                    style={styles.selectIcon}
-                  />
-                </TouchableOpacity>
-              )}
-              ItemSeparatorComponent={() => <View style={styles.separator} />}
-              showsVerticalScrollIndicator={false}
-            />
+                    <Image 
+                      source={require('../Assets/down.png')} 
+                      style={styles.selectIcon}
+                    />
+                  </TouchableOpacity>
+                  {index < savedDocuments.length - 1 && <View style={styles.separator} />}
+                </View>
+              ))}
+            </ScrollView>
           )}
         </View>
       </View>
@@ -980,6 +988,7 @@ const styles = StyleSheet.create({
     fontSize: scale(16),
     color: '#4F8EF7',
     fontWeight: '500',
+    textAlign: 'center',
   },
   uploadedFileContainer: {
     backgroundColor: '#4F8EF7',
@@ -1038,6 +1047,9 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
+  },
+  signatureSection: {
+    marginBottom: verticalScale(20),
   },
   uploadButtonIcon: {
     width: scale(20),
@@ -1098,7 +1110,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: moderateScale(15),
     width: '100%',
-    maxHeight: '80%',
+    maxHeight: '85%',
+    minHeight: '60%',
     overflow: 'hidden',
   },
   modalHeader: {
@@ -1156,9 +1169,15 @@ const styles = StyleSheet.create({
     color: '#999999',
     textAlign: 'center',
   },
-  documentList: {
+  documentScrollContainer: {
+    flex: 1,
+    maxHeight: verticalScale(400), // Modal içinde maksimum yükseklik artırıldı
     paddingHorizontal: scale(15),
-    paddingVertical: verticalScale(10),
+  },
+  documentScrollContent: {
+    flexGrow: 1,
+    paddingVertical: verticalScale(15),
+    paddingBottom: verticalScale(25),
   },
   documentItem: {
     flexDirection: 'row',
@@ -1166,8 +1185,17 @@ const styles = StyleSheet.create({
     backgroundColor: '#f8f9fa',
     borderRadius: moderateScale(10),
     padding: scale(15),
+    marginVertical: verticalScale(5),
     borderWidth: 1,
     borderColor: '#e9ecef',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
   },
   documentInfo: {
     flex: 1,
@@ -1212,7 +1240,7 @@ const styles = StyleSheet.create({
     color: '#666666',
   },
   selectIcon: {
-    width: scale(20),
+    width: scale(10),
     height: scale(20),
     tintColor: '#4F8EF7',
     transform: [{ rotate: '-90deg' }],
@@ -1233,7 +1261,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     borderRadius: moderateScale(15),
     width: '100%',
-    height: '90%',
+    height: '93%',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOffset: {
