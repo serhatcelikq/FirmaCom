@@ -294,22 +294,12 @@ export default function SigininDocumentsScreen({ route }) {
         console.log('Basit XOR ile şifrelendi, boyut:', encryptedData.length);
       }
       
-      // Dosya adını oluştur (tarih + belge tipi + orijinal ad)
-      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
-      const sanitizedDocType = filtredDocument.name.replace(/[^a-zA-Z0-9]/g, '_');
-      const encryptedFileName = `${timestamp}_${sanitizedDocType}_encrypted.enc`;
-      
       // Kayıt klasörü yolunu belirle
       const documentsPath = Platform.OS === 'ios' 
         ? RNFS.DocumentDirectoryPath 
         : RNFS.ExternalDirectoryPath;
       
       const firmaComDir = `${documentsPath}/FirmaCom_Documents`;
-      const encryptedFilePath = `${firmaComDir}/${encryptedFileName}`;
-      
-      console.log('Kayıt klasörü:', firmaComDir);
-      console.log('Şifreli dosya yolu:', encryptedFilePath);
-      console.log('Şifreleme tipi:', encryptionType);
       
       // FirmaCom klasörü yoksa oluştur
       try {
@@ -322,11 +312,65 @@ export default function SigininDocumentsScreen({ route }) {
         console.log('Klasör oluşturma hatası:', dirError.message);
         throw new Error(`Kayıt klasörü oluşturulamadı: ${dirError.message}`);
       }
+
+      // Benzersiz dosya adı oluşturma fonksiyonu
+      const generateUniqueFileName = async (baseName, extension, directory) => {
+        let counter = 0;
+        let fileName = `${baseName}.${extension}`;
+        let filePath = `${directory}/${fileName}`;
+        
+        // Dosya varsa sayaç ekleyerek yeni isim oluştur
+        while (await RNFS.exists(filePath)) {
+          counter++;
+          fileName = `${baseName}(${counter}).${extension}`;
+          filePath = `${directory}/${fileName}`;
+        }
+        
+        return { fileName, filePath };
+      };
+      
+      // Dosya adı şablonunu oluştur - namedesc kullanarak
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+      const time = new Date().toLocaleTimeString('tr-TR', { 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+      }).replace(/:/g, '-');
+      
+      // namedesc'den dosya adı oluştur (Türkçe karakterleri temizle)
+      const sanitizedNameDesc = filtredDocument.namedesc
+        .replace(/[ıİĞğÜüŞşÖöÇç]/g, (char) => {
+          const map = {
+            'ı': 'i', 'İ': 'I', 'Ğ': 'G', 'ğ': 'g',
+            'Ü': 'U', 'ü': 'u', 'Ş': 'S', 'ş': 's',
+            'Ö': 'O', 'ö': 'o', 'Ç': 'C', 'ç': 'c'
+          };
+          return map[char] || char;
+        })
+        .replace(/[^a-zA-Z0-9\s]/g, '') // Özel karakterleri kaldır
+        .replace(/\s+/g, '') // Boşlukları kaldır
+        .toLowerCase();
+      
+      console.log('Orijinal namedesc:', filtredDocument.namedesc);
+      console.log('Temizlenmiş namedesc:', sanitizedNameDesc);
+      
+      // Benzersiz şifreli dosya adı oluştur (namedesc + .pdf)
+      const encryptedBaseName = sanitizedNameDesc; // Sadece namedesc kullan
+      const encryptedFileInfo = await generateUniqueFileName(encryptedBaseName, 'pdf', firmaComDir);
+      
+      // Benzersiz metadata dosya adı oluştur 
+      const metadataBaseName = `${sanitizedNameDesc}_metadata`;
+      const metadataFileInfo = await generateUniqueFileName(metadataBaseName, 'json', firmaComDir);
+      
+      console.log('Kayıt klasörü:', firmaComDir);
+      console.log('Şifreli dosya yolu:', encryptedFileInfo.filePath);
+      console.log('Metadata dosya yolu:', metadataFileInfo.filePath);
+      console.log('Şifreleme tipi:', encryptionType);
       
       // Şifreli dosyayı kaydet
       try {
-        await RNFS.writeFile(encryptedFilePath, encryptedData, 'utf8');
-        console.log('📄 Şifreli dosya kaydedildi:', encryptedFileName);
+        await RNFS.writeFile(encryptedFileInfo.filePath, encryptedData, 'utf8');
+        console.log('📄 Şifreli dosya kaydedildi:', encryptedFileInfo.fileName);
       } catch (writeError) {
         console.log('RNFS yazma hatası:', writeError.message);
         throw new Error(`Dosya yazma hatası: ${writeError.message}`);
@@ -335,21 +379,28 @@ export default function SigininDocumentsScreen({ route }) {
       // Metadata dosyası oluştur (şifreleme anahtarı ile birlikte)
       const metadata = {
         originalFileName: uploadedFileName,
-        encryptedFileName: encryptedFileName,
+        savedFileName: encryptedFileInfo.fileName, // Kaydedilen PDF dosya adı (sayaç dahil)
+        displayName: encryptedFileInfo.fileName, // Modal'da gösterilecek ad (sayaç dahil)
+        encryptedFileName: encryptedFileInfo.fileName, // Geriye uyumluluk için
         encryptionKey: encryptionKey,
         documentType: filtredDocument.name,
+        documentNameDesc: filtredDocument.namedesc, // namedesc'i metadata'ya ekle
+        baseFileName: sanitizedNameDesc, // Temizlenmiş base ad (sayaç olmadan)
         createdAt: new Date().toISOString(),
         fileSize: uploadedFileSize,
-        encryptedPath: encryptedFilePath,
+        encryptedPath: encryptedFileInfo.filePath,
         encryptionType: encryptionType // Doğru şifreleme tipini kullan
       };
       
-      const metadataFileName = `${timestamp}_${sanitizedDocType}_metadata.json`;
-      const metadataPath = `${firmaComDir}/${metadataFileName}`;
+      console.log('📄 Metadata içeriği:');
+      console.log('  - originalFileName:', metadata.originalFileName);
+      console.log('  - savedFileName:', metadata.savedFileName);
+      console.log('  - displayName:', metadata.displayName);
+      console.log('  - documentNameDesc:', metadata.documentNameDesc);
       
       try {
-        await RNFS.writeFile(metadataPath, JSON.stringify(metadata, null, 2), 'utf8');
-        console.log('📄 Metadata dosyası kaydedildi:', metadataFileName);
+        await RNFS.writeFile(metadataFileInfo.filePath, JSON.stringify(metadata, null, 2), 'utf8');
+        console.log('📄 Metadata dosyası kaydedildi:', metadataFileInfo.fileName);
       } catch (metaError) {
         console.log('Metadata yazma hatası:', metaError.message);
         // Metadata hatası önemli değil, ana dosya kaydedildi
@@ -368,7 +419,7 @@ export default function SigininDocumentsScreen({ route }) {
       
       Alert.alert(
         '✅ Başarılı', 
-        `${filtredDocument.name} başarıyla şifreli olarak kaydedildi!\n\n📁 Kayıt yeri: FirmaCom_Documents\n📄 Şifreli dosya: ${encryptedFileName}\n📄 Metadata: ${metadataFileName}`,
+        `${filtredDocument.namedesc} başarıyla kaydedildi!\n\n📁 Kayıt yeri: FirmaCom_Documents\n📄 Dosya adı: ${encryptedFileInfo.fileName}\n📄 Metadata: ${metadataFileInfo.fileName}`,
         [
           {
             text: 'Tamam',
@@ -532,7 +583,7 @@ export default function SigininDocumentsScreen({ route }) {
     disabled={!isFileUploaded || isSending}
   >
                 <Text style={{ color: '#ffffff', marginRight: scale(10) }}>
-                  {isSending ? 'Kaydediliyor...' : 'Dosyayı Gönder'}
+                  {isSending ? 'Kaydediliyor...' : 'Dosyayı Kaydet'}
                 </Text>
                  <Image source={require('../Assets/send.png')} style={{ width: scale(24), height: verticalScale(24), tintColor: '#ffffff' }}/>
               </TouchableOpacity>
