@@ -1,9 +1,10 @@
-import { Image, KeyboardAvoidingView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, Platform } from 'react-native'
+import { Image, KeyboardAvoidingView, ScrollView, StatusBar, StyleSheet, Text, TextInput, TouchableOpacity, View, Platform, Alert } from 'react-native'
 import React, { useState } from 'react'
 import { Button } from 'react-native'
 import { useNavigation } from '@react-navigation/native'
 import LinearGradient from 'react-native-linear-gradient';
 import { scale,verticalScale,moderateScale } from '../utils/Responsive';
+import { firebaseAuth } from '../../firebase.config';
 
 
 
@@ -12,10 +13,30 @@ export default function LoginScreen() {
   
   const [secureText, setSecureText] = useState(true);
   const [rememberme, setRememberMe] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   function RemmeberHandler(value) {
     setRememberMe(value);
   }
+
+  // Google ile giriş fonksiyonu
+  const handleGoogleSignIn = async () => {
+    try {
+      setIsLoading(true);
+      const result = await firebaseAuth.signInWithGoogle();
+      
+      if (result.success) {
+        Alert.alert('Başarılı', 'Google ile giriş yapıldı!');
+        navigation.navigate('TabBarNavigation');
+      } else {
+        Alert.alert('Hata', result.error || 'Google ile giriş yapılamadı');
+      }
+    } catch (error) {
+      Alert.alert('Hata', 'Bir hata oluştu: ' + error.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <KeyboardAvoidingView
@@ -117,10 +138,12 @@ export default function LoginScreen() {
       <Text style={{color:'#FFFFFF80',fontSize:moderateScale(14)}}>veya</Text>
       <View style={{borderWidth:1,width:'40%',borderColor:'#FFFFFF80'}}/>
      </View>
-    <TouchableOpacity style={styles.ButtonGoogleContainer} onPress={() => navigation.navigate('TabBarNavigation')}>
+    <TouchableOpacity style={styles.ButtonGoogleContainer} onPress={handleGoogleSignIn} disabled={isLoading}>
       <View style={styles.pictureGoogleContainer}>
         <Image source={require('../Assets/google.png')} style={{width: scale(25), height: scale(25), marginRight: scale(10)}}/>
-         <Text style={{color: '#000000', fontSize: moderateScale(16),fontWeight: 'bold'}}>Google ile Devam et</Text>
+         <Text style={{color: '#000000', fontSize: moderateScale(16),fontWeight: 'bold'}}>
+           {isLoading ? 'Giriş yapılıyor...' : 'Google ile Devam et'}
+         </Text>
       </View>
      
     </TouchableOpacity>

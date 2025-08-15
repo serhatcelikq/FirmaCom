@@ -1,6 +1,7 @@
 apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
+apply plugin: 'com.google.gms.google-services'
 
 /**
  * This is the configuration block to customize your React Native Android app.
@@ -88,6 +89,12 @@ android {
             storePassword 'android'
             keyAlias 'androiddebugkey'
             keyPassword 'android'
+        }
+          release {
+            storeFile file('my-release-key.keystore') // senin verdiğin isim
+            storePassword '123456'   // buraya kendi şifreni yaz
+            keyAlias 'my-release-key-alias'           // buraya kendi alias'ını yaz
+            keyPassword '123456'     // buraya kendi şifreni yaz
         }
     }
     buildTypes {

@@ -1,7 +1,8 @@
 import { StyleSheet, Text, View } from 'react-native'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { GoogleSignin } from '@react-native-google-signin/google-signin';
 
 import LoginScreen from './src/Screens/LoginScreen';
 import RegisterScreen from './src/Screens/RegisterScreen';
@@ -25,6 +26,24 @@ const Stack = createNativeStackNavigator();
 
 
 export default function App() {
+  
+  useEffect(() => {
+    // Google Sign-In'i uygulama başladığında konfigüre et
+    const configureGoogleSignIn = async () => {
+      try {
+        GoogleSignin.configure({
+          webClientId: '133076138558-rldtsjntnudlnjgn7ti9qka15edl00cn.apps.googleusercontent.com',
+          iosClientId: '133076138558-atn06d4g02tc2qrnalt57c811cpuv1kb.apps.googleusercontent.com', // iOS'tan
+        });
+        console.log('Google Sign-In konfigüre edildi');
+      } catch (error) {
+        console.error('Google Sign-In konfigürasyon hatası:', error);
+      }
+    };
+    
+    configureGoogleSignIn();
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="LoginScreen">

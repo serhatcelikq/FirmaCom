@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "133076138558",
+    "project_id": "firmacommm",
+    "storage_bucket": "firmacommm.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:133076138558:android:e8733ae75c330558b96f6f",
+        "android_client_info": {
+          "package_name": "com.firmacom"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "133076138558-pi8jbigcp1lmph4746363j8moijknrvs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.firmacom",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "133076138558-rldtsjntnudlnjgn7ti9qka15edl00cn.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjTuBhBH26jt_X2tLeLG9P9YOo4SdShyw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "133076138558-rldtsjntnudlnjgn7ti9qka15edl00cn.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "133076138558-atn06d4g02tc2qrnalt57c811cpuv1kb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "org.reactjs.native.example.FirmaCom"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
